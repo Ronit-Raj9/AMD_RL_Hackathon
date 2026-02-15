@@ -1,0 +1,39 @@
+## Minesweeper Agent Configuration ##
+# Generation parameters for LLM-based Minesweeper agent (eval/inference)
+
+max_new_tokens: 128    # Short output for JSON only
+temperature: 0.7       # LAMER paper: 0.7 for eval/inference
+top_p: 0.9
+repetition_penalty: 1.2
+do_sample: true
+
+## Training Hyperparameters ##
+lora_rank: 32
+lora_alpha: 32
+lora_dropout: 0.05
+learning_rate: 5e-6            # GRPO-LEAD: reduced for stability (was 2e-5)
+lr_scheduler_type: cosine
+num_generations: 24            # v2: more diversity, prevents collapse (was 16)
+max_steps: 500
+reward_weights: [0.60, 0.35, 0.05]  # v2: format dominates (was [0.40, 0.50, 0.10])
+
+## v2: Temperature Annealing ##
+initial_temperature: 1.2       # Training starts high for exploration
+final_temperature: 0.7         # Anneals down over first 70% of steps
+
+## v3: Curriculum Learning ##
+# Board size distribution — bell-curve centered on mid-range (8-20)
+size_bands:
+  - {min: 1,  max: 5,  weight: 0.10, label: "Tiny"}    # 10%
+  - {min: 5,  max: 10, weight: 0.20, label: "Small"}   # 20%
+  - {min: 8,  max: 20, weight: 0.35, label: "Mid"}     # 35% ★ peak
+  - {min: 15, max: 30, weight: 0.20, label: "Large"}   # 20%
+  - {min: 25, max: 40, weight: 0.10, label: "XL"}      # 10%
+  - {min: 35, max: 50, weight: 0.05, label: "XXL"}     #  5%
+
+# Prompt tiers — proportional to board complexity
+prompt_tiers:
+  tiny:   {max_dim: 5,  style: "minimal"}          # Hints + format only
+  small:  {max_dim: 12, style: "standard_2step"}   # STEP 1-2 + hints
+  medium: {max_dim: 25, style: "detailed_4step"}   # STEP 1-4 + patterns
+  large:  {max_dim: 50, style: "comprehensive"}    # Full + structural guidance
