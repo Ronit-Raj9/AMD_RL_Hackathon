@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 class MinesweeperAgent(object):
     def __init__(self, **kwargs):
         # ✅ CHANGE 1: Update model path to your merged model
-        model_name = "/workspace/minesweeper_checkpoints/merged_latest"
+        model_name = "/workspace/my_minesweeper_model_merged_latest"
         
         # Load the tokenizer and the model
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
